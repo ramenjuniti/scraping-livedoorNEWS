@@ -38,14 +38,36 @@ func main() {
 
 	readerCurContents := strings.NewReader(curContentsDom)
 	contentsDom, _ := goquery.NewDocumentFromReader(readerCurContents)
-	listDom := contentsDom.Find(".articleList").Children()
-	listLen := listDom.Length()
 
-	for i := 1; i <= listLen; i++ {
-		iStr := strconv.Itoa(i)
-		page.Find(".articleList > li:nth-child(" + iStr + ") > a").Click()
-		page.Back()
+	for {
+		listDom := contentsDom.Find(".articleList").Children()
+		listLen := listDom.Length()
+		for i := 1; i <= listLen; i++ {
+			fmt.Printf("%v 番目の記事の情報を取得します\n", i)
+			iStr := strconv.Itoa(i)
+			page.Find(".articleList > li:nth-child(" + iStr + ") > a").Click()
+			time.Sleep(2 * time.Second)
+			summary, err := page.FindByClass("summaryList").Text()
+			if err == nil {
+				summaryList := strings.Split(summary, "\n")
+				fmt.Println("summaryList:", summaryList)
+				page.Find(".articleMore > a").Click()
+				time.Sleep(2 * time.Second)
+				articleTitle, _ := page.Find(".articleTtl").Text()
+				articleBody, _ := page.Find(".articleBody > span").Text()
+				fmt.Println("articleTitle:", articleTitle)
+				fmt.Println("articleBody:", articleBody)
+				page.Back()
+			}
+			page.Back()
+			time.Sleep(2 * time.Second)
+		}
+		nextPage := page.Find("li.next > a")
+		_, err := nextPage.Text()
+		if err != nil {
+			break
+		}
+		nextPage.Click()
 		time.Sleep(2 * time.Second)
-		fmt.Println("kita")
 	}
 }
