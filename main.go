@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/csv"
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -12,10 +14,21 @@ import (
 )
 
 func main() {
+	file, err := os.OpenFile("./articleData.csv", os.O_WRONLY|os.O_CREATE, 0600)
+	if err != nil {
+		log.Printf("Failed to open file: %v", err)
+	}
+	defer file.Close()
+
+	err = file.Truncate(0)
+	if err != nil {
+		log.Printf("Failed to clear file: %v", err)
+	}
+
 	url := "http://news.livedoor.com/topics/category/main/"
 	driver := agouti.ChromeDriver()
 
-	err := driver.Start()
+	err = driver.Start()
 	if err != nil {
 		log.Printf("Failed to start driver: %v", err)
 	}
@@ -42,21 +55,36 @@ func main() {
 	for {
 		listDom := contentsDom.Find(".articleList").Children()
 		listLen := listDom.Length()
+
 		for i := 1; i <= listLen; i++ {
 			fmt.Printf("%v 番目の記事の情報を取得します\n", i)
 			iStr := strconv.Itoa(i)
 			page.Find(".articleList > li:nth-child(" + iStr + ") > a").Click()
 			time.Sleep(2 * time.Second)
+
 			summary, err := page.FindByClass("summaryList").Text()
 			if err == nil {
 				summaryList := strings.Split(summary, "\n")
-				fmt.Println("summaryList:", summaryList)
 				page.Find(".articleMore > a").Click()
 				time.Sleep(2 * time.Second)
-				articleTitle, _ := page.Find(".articleTtl").Text()
-				articleBody, _ := page.Find(".articleBody > span").Text()
-				fmt.Println("articleTitle:", articleTitle)
-				fmt.Println("articleBody:", articleBody)
+
+				articleTitle, err := page.Find(".articleTtl").Text()
+				articleBody, err := page.Find(".articleBody > span").Text()
+
+				fmt.Printf("%T", articleTitle)
+				fmt.Printf("%T", articleBody)
+
+				if err == nil {
+					writer := csv.NewWriter(file)
+					writer.Write([]string{
+						articleTitle,
+						articleBody,
+						summaryList[0],
+						summaryList[1],
+						summaryList[2],
+					})
+					writer.Flush()
+				}
 				page.Back()
 			}
 			page.Back()
