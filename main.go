@@ -25,6 +25,10 @@ func main() {
 		log.Printf("Failed to clear file: %v", err)
 	}
 
+	writer := csv.NewWriter(file)
+	writer.Write([]string{"", "title", "body", "summary1", "summary2", "summary3"})
+	writer.Flush()
+
 	url := "http://news.livedoor.com/topics/category/main/"
 	driver := agouti.ChromeDriver()
 
@@ -72,7 +76,6 @@ func main() {
 				articleBody, err := page.Find(".articleBody > span").Text()
 
 				if err == nil {
-					writer := csv.NewWriter(file)
 					writer.Write([]string{
 						articleTitle,
 						articleBody,
