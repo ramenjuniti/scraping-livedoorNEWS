@@ -71,9 +71,6 @@ func main() {
 				articleTitle, err := page.Find(".articleTtl").Text()
 				articleBody, err := page.Find(".articleBody > span").Text()
 
-				fmt.Printf("%T", articleTitle)
-				fmt.Printf("%T", articleBody)
-
 				if err == nil {
 					writer := csv.NewWriter(file)
 					writer.Write([]string{
