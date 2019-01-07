@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/csv"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -14,7 +15,10 @@ import (
 )
 
 func main() {
-	file, err := os.OpenFile("./articleData.csv", os.O_WRONLY|os.O_CREATE, 0600)
+	flag.Parse()
+	arg := flag.Arg(0)
+
+	file, err := os.OpenFile(arg, os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {
 		log.Printf("Failed to open file: %v", err)
 	}
