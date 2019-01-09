@@ -68,13 +68,16 @@ func main() {
 			fmt.Printf("%v 番目の記事の情報を取得します\n", i)
 			iStr := strconv.Itoa(i)
 			page.Find(".articleList > li:nth-child(" + iStr + ") > a").Click()
-			time.Sleep(2 * time.Second)
+			time.Sleep(5 * time.Second)
 
 			summary, err := page.FindByClass("summaryList").Text()
 			if err == nil {
 				summaryList := strings.Split(summary, "\n")
+				if len(summaryList) < 3 {
+					page.Back()
+				}
 				page.Find(".articleMore > a").Click()
-				time.Sleep(2 * time.Second)
+				time.Sleep(5 * time.Second)
 
 				articleTitle, err := page.Find(".articleTtl").Text()
 				articleBody, err := page.Find(".articleBody > span").Text()
@@ -92,7 +95,7 @@ func main() {
 				page.Back()
 			}
 			page.Back()
-			time.Sleep(2 * time.Second)
+			time.Sleep(5 * time.Second)
 		}
 		nextPage := page.Find("li.next > a")
 		_, err := nextPage.Text()
@@ -100,6 +103,6 @@ func main() {
 			break
 		}
 		nextPage.Click()
-		time.Sleep(2 * time.Second)
+		time.Sleep(5 * time.Second)
 	}
 }
