@@ -75,24 +75,25 @@ func main() {
 				summaryList := strings.Split(summary, "\n")
 				if len(summaryList) < 3 {
 					page.Back()
-				}
-				page.Find(".articleMore > a").Click()
-				time.Sleep(5 * time.Second)
+				} else {
+					page.Find(".articleMore > a").Click()
+					time.Sleep(5 * time.Second)
 
-				articleTitle, err := page.Find(".articleTtl").Text()
-				articleBody, err := page.Find(".articleBody > span").Text()
+					articleTitle, err := page.Find(".articleTtl").Text()
+					articleBody, err := page.Find(".articleBody > span").Text()
 
-				if err == nil {
-					writer.Write([]string{
-						articleTitle,
-						articleBody,
-						summaryList[0],
-						summaryList[1],
-						summaryList[2],
-					})
-					writer.Flush()
+					if err == nil {
+						writer.Write([]string{
+							articleTitle,
+							articleBody,
+							summaryList[0],
+							summaryList[1],
+							summaryList[2],
+						})
+						writer.Flush()
+					}
+					page.Back()
 				}
-				page.Back()
 			}
 			page.Back()
 			time.Sleep(5 * time.Second)
