@@ -73,9 +73,7 @@ func main() {
 			summary, err := page.FindByClass("summaryList").Text()
 			if err == nil {
 				summaryList := strings.Split(summary, "\n")
-				if len(summaryList) < 3 {
-					page.Back()
-				} else {
+				if len(summaryList) == 3 {
 					page.Find(".articleMore > a").Click()
 					time.Sleep(5 * time.Second)
 
@@ -98,7 +96,7 @@ func main() {
 			page.Back()
 			time.Sleep(5 * time.Second)
 		}
-		nextPage := page.Find("li.next > a")
+		nextPage := page.Find(".next > a")
 		_, err := nextPage.Text()
 		if err != nil {
 			break
