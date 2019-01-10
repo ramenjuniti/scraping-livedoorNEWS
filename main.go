@@ -73,8 +73,10 @@ func main() {
 			summary, err := page.FindByClass("summaryList").Text()
 			if err == nil {
 				summaryList := strings.Split(summary, "\n")
-				if len(summaryList) == 3 {
-					page.Find(".articleMore > a").Click()
+				articleMoreButton := page.Find(".articleMore > a")
+				_, err := articleMoreButton.Text()
+				if len(summaryList) == 3 && err == nil {
+					articleMoreButton.Click()
 					time.Sleep(5 * time.Second)
 
 					articleTitle, err := page.Find(".articleTtl").Text()
