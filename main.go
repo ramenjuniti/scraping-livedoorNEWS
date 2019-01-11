@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/csv"
 	"flag"
-	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -33,6 +32,7 @@ func main() {
 	writer.Write([]string{"", "title", "body", "summary1", "summary2", "summary3"})
 	writer.Flush()
 
+	// livedoor NEWS 主要ニュース
 	url := "http://news.livedoor.com/topics/category/main/"
 	driver := agouti.ChromeDriver()
 
@@ -65,20 +65,19 @@ func main() {
 		listLen := listDom.Length()
 
 		for i := 1; i <= listLen; i++ {
-			fmt.Printf("%v 番目の記事の情報を取得します\n", i)
 			iStr := strconv.Itoa(i)
 			page.Find(".articleList > li:nth-child(" + iStr + ") > a").Click()
 			time.Sleep(5 * time.Second)
-
 			summary, err := page.FindByClass("summaryList").Text()
+
 			if err == nil {
 				summaryList := strings.Split(summary, "\n")
 				articleMoreButton := page.Find(".articleMore > a")
 				_, err := articleMoreButton.Text()
+
 				if len(summaryList) == 3 && err == nil {
 					articleMoreButton.Click()
 					time.Sleep(5 * time.Second)
-
 					articleTitle, err := page.Find(".articleTtl").Text()
 					articleBody, err := page.Find(".articleBody > span").Text()
 
