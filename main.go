@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/csv"
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -60,6 +61,8 @@ func main() {
 	readerCurContents := strings.NewReader(curContentsDom)
 	contentsDom, _ := goquery.NewDocumentFromReader(readerCurContents)
 
+	var dataCount int
+
 	for {
 		listDom := contentsDom.Find(".articleList").Children()
 		listLen := listDom.Length()
@@ -90,6 +93,8 @@ func main() {
 							summaryList[2],
 						})
 						writer.Flush()
+						dataCount++
+						fmt.Printf("現在 %v 個の記事を取得済みです\n", dataCount)
 					}
 					page.Back()
 				}
