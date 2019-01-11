@@ -1,14 +1,12 @@
-
-
 # scraping-livedoorNEWS
 
 ## About
 
-[livedoor NEWS](http://news.livedoor.com/)の[主要ニュース](http://news.livedoor.com/topics/category/main/)から以下の3つの情報を取得し，csvファイルを生成する
+[livedoor NEWS](http://news.livedoor.com/)の[主要ニュース](http://news.livedoor.com/topics/category/main/)から以下の 3 つの情報を取得し、csv ファイルを生成する
 
 - 記事タイトル
 - 記事本文
-- 記事の3文要約（ざっくり言うと）
+- 記事の 3 文要約（ざっくり言うと）
 
 **記事がある限り取得し続けます**
 
@@ -26,4 +24,5 @@ go run main.go sample.csv
 ```
 
 ## License
+
 This software is released under the MIT License, see LICENSE.
