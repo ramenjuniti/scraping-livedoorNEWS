@@ -69,7 +69,7 @@ func main() {
 
 		for i := 1; i <= listLen; i++ {
 			iStr := strconv.Itoa(i)
-			if _, err := page.Find(".articleList > li:nth-child(" + iStr + ") > a:visited").Text(); err != nil {
+			if _, err := page.Find(".articleList > li:nth-child(" + iStr + ") > a:visited").Text(); err == nil {
 				continue
 			}
 			page.Find(".articleList > li:nth-child(" + iStr + ") > a").Click()
