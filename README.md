@@ -18,6 +18,7 @@
 ## Usage
 
 ```
+brew cask install chromediver
 git clone git@github.com:ramenjuniti/scraping-livedoorNEWS.git
 cd scraping-livedoorNEWS
 go run main.go sample.csv
