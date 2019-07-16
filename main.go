@@ -14,6 +14,13 @@ import (
 	"github.com/sclevine/agouti"
 )
 
+const sleepTime = 5
+
+func replace(t string) string {
+	r := strings.NewReplacer("\n", "")
+	return r.Replace(t)
+}
+
 func main() {
 	flag.Parse()
 	arg := flag.Arg(0)
@@ -73,7 +80,7 @@ func main() {
 				continue
 			}
 			page.Find(".articleList > li:nth-child(" + iStr + ") > a").Click()
-			time.Sleep(10 * time.Second)
+			time.Sleep(sleepTime * time.Second)
 			summary, err := page.FindByClass("summaryList").Text()
 
 			if err == nil {
@@ -83,17 +90,17 @@ func main() {
 
 				if len(summaryList) == 3 && err == nil {
 					articleMoreButton.Click()
-					time.Sleep(5 * time.Second)
+					time.Sleep(sleepTime * time.Second)
 					articleTitle, err := page.Find(".articleTtl").Text()
 					articleBody, err := page.Find(".articleBody > span").Text()
 
 					if err == nil {
 						writer.Write([]string{
-							articleTitle,
-							articleBody,
-							summaryList[0],
-							summaryList[1],
-							summaryList[2],
+							replace(articleTitle),
+							replace(articleBody),
+							replace(summaryList[0]),
+							replace(summaryList[1]),
+							replace(summaryList[2]),
 						})
 						writer.Flush()
 						dataCount++
@@ -103,7 +110,7 @@ func main() {
 				}
 			}
 			page.Back()
-			time.Sleep(5 * time.Second)
+			time.Sleep(sleepTime * time.Second)
 		}
 		nextPage := page.Find(".next > a")
 		_, err := nextPage.Text()
@@ -111,6 +118,6 @@ func main() {
 			break
 		}
 		nextPage.Click()
-		time.Sleep(5 * time.Second)
+		time.Sleep(sleepTime * time.Second)
 	}
 }
