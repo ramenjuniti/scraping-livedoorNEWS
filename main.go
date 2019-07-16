@@ -4,7 +4,6 @@ import (
 	"encoding/csv"
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -15,6 +14,7 @@ import (
 )
 
 const sleepTime = 5
+const url = "http://news.livedoor.com/topics/category/main/"
 
 func replace(t string) string {
 	r := strings.NewReplacer("\n", "")
@@ -27,42 +27,46 @@ func main() {
 
 	file, err := os.OpenFile(arg, os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {
-		log.Printf("Failed to open file: %v", err)
+		fmt.Fprintf(os.Stderr, "Failed to open file: %v", err)
+		os.Exit(1)
 	}
 	defer file.Close()
 
 	err = file.Truncate(0)
 	if err != nil {
-		log.Printf("Failed to clear file: %v", err)
+		fmt.Fprintf(os.Stderr, "Failed to clear file: %v", err)
+		os.Exit(1)
 	}
 
 	writer := csv.NewWriter(file)
 	writer.Write([]string{"", "title", "body", "summary1", "summary2", "summary3"})
 	writer.Flush()
 
-	// livedoor NEWS 主要ニュース
-	url := "http://news.livedoor.com/topics/category/main/"
 	driver := agouti.ChromeDriver()
 
 	err = driver.Start()
 	if err != nil {
-		log.Printf("Failed to start driver: %v", err)
+		fmt.Fprintf(os.Stderr, "Failed to start driver: %v", err)
+		os.Exit(1)
 	}
 	defer driver.Stop()
 
 	page, err := driver.NewPage(agouti.Browser("chrome"))
 	if err != nil {
-		log.Printf("Failed to open page: %v", err)
+		fmt.Fprintf(os.Stderr, "Failed to open page: %v", err)
+		os.Exit(1)
 	}
 
 	err = page.Navigate(url)
 	if err != nil {
-		log.Printf("Failed to navigate: %v", err)
+		fmt.Fprintf(os.Stderr, "Failed to navigate: %v", err)
+		os.Exit(1)
 	}
 
 	curContentsDom, err := page.HTML()
 	if err != nil {
-		log.Printf("Failed to get html: %v", err)
+		fmt.Fprintf(os.Stderr, "Failed to get html: %v", err)
+		os.Exit(1)
 	}
 
 	readerCurContents := strings.NewReader(curContentsDom)
