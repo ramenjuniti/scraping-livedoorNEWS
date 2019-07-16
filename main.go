@@ -14,10 +14,10 @@ import (
 )
 
 const sleepTime = 5
-const url = "http://news.livedoor.com/topics/category/main/"
+const url = "https://news.livedoor.com/topics/category/dom/"
 
 func replace(t string) string {
-	r := strings.NewReplacer("\n", "")
+	r := strings.NewReplacer("\n", "", ",", "、")
 	return r.Replace(t)
 }
 
