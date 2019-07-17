@@ -79,8 +79,6 @@ func main() {
 		listDom := contentsDom.Find(".articleList").Children()
 		listLen := listDom.Length()
 
-		fmt.Println(listLen)
-		fmt.Println(dataCount)
 		// 記事のリストをぐるぐる
 		for i := 1; i <= listLen; i++ {
 			iStr := strconv.Itoa(i)
