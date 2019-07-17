@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/csv"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -78,49 +79,96 @@ func main() {
 		listDom := contentsDom.Find(".articleList").Children()
 		listLen := listDom.Length()
 
+		fmt.Println(listLen)
+		fmt.Println(dataCount)
+		// 記事のリストをぐるぐる
 		for i := 1; i <= listLen; i++ {
 			iStr := strconv.Itoa(i)
 			if _, err := page.Find(".articleList > li:nth-child(" + iStr + ") > a:visited").Text(); err == nil {
 				continue
 			}
+
+			// 記事のタイトルと要約へ
 			page.Find(".articleList > li:nth-child(" + iStr + ") > a").Click()
 			time.Sleep(sleepTime * time.Second)
-			summary, err := page.FindByClass("summaryList").Text()
 
-			if err == nil {
-				summaryList := strings.Split(summary, "\n")
-				articleMoreButton := page.Find(".articleMore > a")
-				_, err := articleMoreButton.Text()
-
-				if len(summaryList) == 3 && err == nil {
-					articleMoreButton.Click()
-					time.Sleep(sleepTime * time.Second)
-					articleTitle, err := page.Find(".articleTtl").Text()
-					articleBody, err := page.Find(".articleBody > span").Text()
-
-					if err == nil {
-						writer.Write([]string{
-							replace(articleTitle),
-							replace(articleBody),
-							replace(summaryList[0]),
-							replace(summaryList[1]),
-							replace(summaryList[2]),
-						})
-						writer.Flush()
-						dataCount++
-						fmt.Printf("現在 %v 個の記事を取得済みです\n", dataCount)
-					}
-					page.Back()
-				}
+			// タイトル取得
+			articleTitle, err := page.Find(".topicsTtl > a").Text()
+			if err != nil {
+				page.Back()
+				time.Sleep(sleepTime * time.Second)
+				continue
 			}
+
+			// 要約取得
+			summary, err := page.FindByClass("summaryList").Text()
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				page.Back()
+				time.Sleep(sleepTime * time.Second)
+				continue
+			}
+
+			// 要約が3文かどうかチェック
+			summaryList := strings.Split(summary, "\n")
+			articleMoreButton := page.Find(".articleMore > a")
+			_, err = articleMoreButton.Text()
+			if len(summaryList) != 3 || err != nil {
+				if len(summaryList) != 3 {
+					fmt.Fprintln(os.Stderr, errors.New("there are less than 3 summaries"))
+				}
+				if err != nil {
+					fmt.Fprintln(os.Stderr, err)
+				}
+				page.Back()
+				time.Sleep(sleepTime * time.Second)
+				continue
+			}
+
+			// 記事の本文へ
+			articleMoreButton.Click()
+			time.Sleep(sleepTime * time.Second)
+
+			// 記事の本文取得
+			articleBody, err := page.Find(".articleBody > span").Text()
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				page.Back()
+				time.Sleep(sleepTime * time.Second)
+				page.Back()
+				time.Sleep(sleepTime * time.Second)
+				continue
+			}
+
+			// csvに書き込み
+			writer.Write([]string{
+				replace(articleTitle),
+				replace(articleBody),
+				replace(summaryList[0]),
+				replace(summaryList[1]),
+				replace(summaryList[2]),
+			})
+			writer.Flush()
+			dataCount++
+			fmt.Printf("現在 %v 個の記事を取得済みです\n", dataCount)
+
+			// 本文 -> タイトル＆要約
+			page.Back()
+			time.Sleep(sleepTime * time.Second)
+
+			// タイトル＆要約 -> 記事リスト
 			page.Back()
 			time.Sleep(sleepTime * time.Second)
 		}
+
+		// 次の記事リストへ
 		nextPage := page.Find(".next > a")
 		_, err := nextPage.Text()
 		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
 			break
 		}
+
 		nextPage.Click()
 		time.Sleep(sleepTime * time.Second)
 	}
