@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -73,6 +74,7 @@ func main() {
 	readerCurContents := strings.NewReader(curContentsDom)
 	contentsDom, _ := goquery.NewDocumentFromReader(readerCurContents)
 
+	var visitedIds []int
 	var dataCount int
 
 	for {
@@ -80,19 +82,46 @@ func main() {
 		listLen := listDom.Length()
 
 		// 記事のリストをぐるぐる
+	L:
 		for i := 1; i <= listLen; i++ {
-			iStr := strconv.Itoa(i)
-			if _, err := page.Find(".articleList > li:nth-child(" + iStr + ") > a:visited").Text(); err == nil {
+			aSelector := ".articleList > li:nth-child(" + strconv.Itoa(i) + ") > a"
+
+			// 記事のhref取得
+			href, err := page.Find(aSelector).Attribute("href")
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
 				continue
 			}
 
+			// hrefから記事idを取得
+			id, err := strconv.Atoi(path.Base(href))
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				continue
+			}
+
+			// すでに取得済みのidであれば処理を飛ばす
+			for _, v := range visitedIds {
+				if id == v {
+					fmt.Println("訪問済です")
+					continue L
+				}
+			}
+
+			// 訪問済にする
+			visitedIds = append(visitedIds, id)
+
 			// 記事のタイトルと要約へ
-			page.Find(".articleList > li:nth-child(" + iStr + ") > a").Click()
+			if err = page.Find(aSelector).Click(); err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				continue
+			}
 			time.Sleep(sleepTime * time.Second)
 
 			// タイトル取得
 			articleTitle, err := page.Find(".topicsTtl > a").Text()
 			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
 				page.Back()
 				time.Sleep(sleepTime * time.Second)
 				continue
@@ -109,23 +138,19 @@ func main() {
 
 			// 要約が3文かどうかチェック
 			summaryList := strings.Split(summary, "\n")
-			articleMoreButton := page.Find(".articleMore > a")
-			_, err = articleMoreButton.Text()
-			if len(summaryList) != 3 || err != nil {
-				if len(summaryList) != 3 {
-					fmt.Fprintln(os.Stderr, errors.New("there are less than 3 summaries"))
-				}
-				if err != nil {
-					fmt.Fprintln(os.Stderr, err)
-				}
+			if len(summaryList) != 3 {
+				fmt.Fprintln(os.Stderr, errors.New("there are less than 3 summaries"))
 				page.Back()
 				time.Sleep(sleepTime * time.Second)
 				continue
 			}
 
 			// 記事の本文へ
-			articleMoreButton.Click()
-			time.Sleep(sleepTime * time.Second)
+			if err = page.Find(".articleMore > a").Click(); err != nil {
+				page.Back()
+				time.Sleep(sleepTime * time.Second)
+				continue
+			}
 
 			// 記事の本文取得
 			articleBody, err := page.Find(".articleBody > span").Text()
@@ -160,14 +185,10 @@ func main() {
 		}
 
 		// 次の記事リストへ
-		nextPage := page.Find(".next > a")
-		_, err := nextPage.Text()
-		if err != nil {
+		if err = page.Find(".next > a").Click(); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			break
 		}
-
-		nextPage.Click()
 		time.Sleep(sleepTime * time.Second)
 	}
 }
