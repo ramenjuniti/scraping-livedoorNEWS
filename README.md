@@ -2,7 +2,7 @@
 
 ## About
 
-[livedoor NEWS](http://news.livedoor.com/)の[主要ニュース](http://news.livedoor.com/topics/category/main/)から以下の 3 つの情報を取得し、csv ファイルを生成する
+[livedoor NEWS](http://news.livedoor.com/)から以下の 3 つの情報を取得し、csv ファイルを生成する
 
 - 記事タイトル
 - 記事本文
